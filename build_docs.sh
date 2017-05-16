@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
-mkdir -p standard/docs/field_definitions
 cd standard
-python schema/utils/make_field_definitions.py
 CODELIST_LANG=en python schema/utils/translate_codelists.py
 
 mkdir -p ../build/en/ || true
@@ -16,10 +14,6 @@ sphinx-build -b dirhtml docs/en ../build/en
 sphinx-build -b gettext docs/en ../build/locale
 # Remove messages from CSVs from Sphinx's own translations as we translate the
 # schema and codelists separately.
-for name in reference records_reference; do
-    msggrep -v -N '../../standard/docs/field_definitions/*.csv'  ../build/locale/schema/${name}.pot > TMP
-    mv TMP ../build/locale/schema/${name}.pot
-done
 msggrep -v -N '../../standard/schema/codelists_translated/*.csv'  ../build/locale/schema/codelists.pot > TMP
 mv TMP ../build/locale/schema/codelists.pot
 msggrep -v -N '../../standard/docs/en/examples/*.csv'  ../build/locale/implementation/serialization.pot > TMP
@@ -39,7 +33,6 @@ python standard/schema/utils/translate_schema.py es fr
 
 cd standard
 for lang in es fr; do
-    SCHEMA_LANG=$lang python schema/utils/make_field_definitions.py
     CODELIST_LANG=$lang python schema/utils/translate_codelists.py
     # Create a symlink for the current language, so we can reference the
     # translated JSON schema from Sphinx directives
