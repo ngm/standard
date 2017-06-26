@@ -18,16 +18,20 @@ sphinx-build -b gettext docs/en ../build/locale
 
 pybabel extract -F .babel_schema . -o ../build/locale/schema.pot
 pybabel extract -F .babel_codelists . -o ../build/locale/codelists.pot
-pybabel compile -d docs/locale -D schema 
-pybabel compile -d docs/locale -D codelists
+
+mkdir -p docs/locale/en_pseudo/LC_MESSAGES || true
+podebug --rewrite unicode ../build/locale docs/locale/en_pseudo/LC_MESSAGES
+
+pybabel compile --use-fuzzy -d docs/locale -D schema 
+pybabel compile --use-fuzzy -d docs/locale -D codelists
 
 cd ..
 cp -r standard/assets build
 # can put multiple languages i.e translate_schema.py en fr
-python standard/schema/utils/translate_schema.py es fr
+python standard/schema/utils/translate_schema.py es fr en_pseudo
 
 cd standard
-for lang in es fr; do
+for lang in en_pseudo; do
     SCHEMA_LANG=$lang python schema/utils/make_field_definitions.py
     CODELIST_LANG=$lang python schema/utils/translate_codelists.py schema
     CODELIST_LANG=$lang python schema/utils/translate_codelists.py docs/en/extensions
